@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kibana-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: efk
+  project: default
+  sources:
+    - repoURL: git@github.com:CarmitHaas/HA-gitops.git
+      targetRevision: HEAD
+      ref: infra-apps 
+    - repoURL: https://helm.elastic.co
+      targetRevision: 8.5.1
+      chart: kibana
+      helm:
+        valueFiles:
+          - "$infra-apps/infra-apps-values/kibana-values.yaml"
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: false
+      selfHeal: false

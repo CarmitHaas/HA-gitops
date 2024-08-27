@@ -1,0 +1,4 @@
+Chart.lock
+*.tgz
+mongodb-secret.yaml
+pub-cert.pem

@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fluentbit-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: efk
+  project: default
+  sources:
+    - repoURL: git@github.com:CarmitHaas/HA-gitops.git
+      targetRevision: HEAD
+      ref: infra-apps 
+    - repoURL: https://fluent.github.io/helm-charts
+      targetRevision: 0.44.0
+      chart: fluent-bit
+      helm:
+        valueFiles:
+          - "$infra-apps/infra-apps-values/fluentbit-values.yaml"
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: false
+      selfHeal: false

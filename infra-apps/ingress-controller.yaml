@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ingress-nginx-application
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: git@github.com:CarmitHaas/HA-gitops.git
+      targetRevision: HEAD
+      ref: infra-apps 
+    - repoURL: https://kubernetes.github.io/ingress-nginx
+      targetRevision: 4.9.0
+      chart: ingress-nginx
+      helm:
+        valueFiles:
+          - "$infra-apps/infra-apps-values/ingress-nginx-values.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ingress
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true
